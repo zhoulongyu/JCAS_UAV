@@ -1,5 +1,5 @@
-# Sensing_assisted communication for UAV networks (To be continued...)
-Code for [*Intelligent Sensing-assisted Communication for Cooperative Connected UAV networks*]() 
+# Sensing and communication integration for UAV networks (To be continued...)
+Code for [*Integrated communication and sensing in UAV Swarms for Cooperative Multiple Targets Tracking*]() 
 ## Basic
 partical raw sensing dataset has been updload, including UWB and MPU 6050.
 

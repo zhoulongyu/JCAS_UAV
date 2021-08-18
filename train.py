@@ -15,8 +15,8 @@ def parse_args():
     parser = argparse.ArgumentParser("Reinforcement Learning experiments for multiagent environments")
     # Environment
     parser.add_argument("--scenario", type=str, default="simple_spread", help="name of the scenario script")
-    parser.add_argument("--max_episode_len", type=int, default=200, help="maximum episode length")
-    parser.add_argument("--num_episodes", type=int, default=2000, help="number of episodes")
+    parser.add_argument("--max_episode_len", type=int, default=50, help="maximum episode length")
+    parser.add_argument("--num_episodes", type=int, default=100, help="number of episodes")
     parser.add_argument("--T", type=int, default=15, help="number of step to initiate a communicagtion group")
     parser.add_argument("--m", type=int, default=2, help="number agents in a communicagtion group")
     # Core training parameters
@@ -63,6 +63,7 @@ def make_env(scenario_name, arglist, benchmark=False):
 
 
 def train(arglist):
+    arglist.benchmark = True
     env = make_env(arglist.scenario, arglist, arglist.benchmark)
     trainer = ATOC_trainer(arglist.gamma, arglist.tau, arglist.actor_hidden_size, arglist.critic_hidden_size, env.observation_space[0], env.action_space[0], arglist)
 
@@ -82,6 +83,7 @@ def train(arglist):
     delay = [0.0]
     energy = [0.0]
     record_C = []
+    occupy = [0.0]
     nagents = len(obs_n)
     if int(nagents/2)==2:
         max_num = 3
@@ -131,6 +133,9 @@ def train(arglist):
         # action_n = np.clip(action_n, 0.0, 1.0)
 
         new_obs_n, reward_n, done_n, info_n = env.step(action_n)
+
+        occupy[-1] += info_n[0]
+        # print(info_n[0])
         # print("reward_n", reward_n)
         
         episode_step += 1
@@ -163,6 +168,8 @@ def train(arglist):
             episode_step = 0
             episode_rewards.append(0)
             delay.append(0)
+            print(occupy)
+            occupy.append(0)
             energy.append(0)
             listC = []
             for z in range(nagents):
@@ -198,36 +205,6 @@ def train(arglist):
 
         # save final episodes rewards for plotting training results
         if len(episode_rewards) > arglist.num_episodes:
-             # result.append(arglist.m)
-            data1 = pd.DataFrame(episode_rewards)
-            data2 = pd.DataFrame(delay)
-            data3 = pd.DataFrame(energy)
-            data4 = pd.DataFrame(record_C)
-            m = []
-            m.append(arglist.m)
-            data5 = pd.DataFrame(m)
-            writer = pd.ExcelWriter('Infor_30_20.xlsx')
-            data1.to_excel(writer, 'episode_rewards')
-            data2.to_excel(writer, 'delay')
-            data3.to_excel(writer, 'energy')
-            data4.to_excel(writer, 'record_C')
-            data5.to_excel(writer, 'arglist.m')
-            writer.save()
-            #writer.close()
-
-
-            # print(dataframe)
-
-
-            print("Finish total of {} episodes.".format(len(episode_rewards)))
-            print(record_C[-10:])
-            # plt.figure(6)
-            # plt.title("reward")
-            # plt.plot(reward, ls="-", lw=2, label="plot figure")
-            # plt.legend()
-            #
-            # plt.show()
-            
             # reward_file_name = arglist.plots_dir + arglist.exp_name + '_rewards.pkl'
             # with open(reward_file_name, 'wb') as fp:
             #     pickle.dump(final_save_rewards, fp)
@@ -259,6 +236,39 @@ def train(arglist):
             #         worksheet1.write(value_x, value_y, label=record_C[value_x][value_y])
             # workbook.save('Excel_test.xls')
 
+
+
+            # result.append(arglist.m)
+            data1 = pd.DataFrame(episode_rewards)
+            data2 = pd.DataFrame(delay)
+            data3 = pd.DataFrame(energy)
+            data4 = pd.DataFrame(record_C)
+            data6 = pd.DataFrame(occupy)
+            m = []
+            m.append(arglist.m)
+            data5 = pd.DataFrame(m)
+            writer = pd.ExcelWriter('data.xlsx')
+            data1.to_excel(writer, 'episode_rewards')
+            data2.to_excel(writer, 'delay')
+            data3.to_excel(writer, 'energy')
+            data4.to_excel(writer, 'record_C')
+            data5.to_excel(writer, 'arglist.m')
+            data6.to_excel(writer,'occupy')
+            writer.save()
+            # writer.close()
+
+
+            # print(dataframe)
+
+
+            print("Finish total of {} episodes.".format(len(episode_rewards)))
+            print(record_C[-10:])
+            # plt.figure(6)
+            # plt.title("reward")
+            # plt.plot(reward, ls="-", lw=2, label="plot figure")
+            # plt.legend()
+            #
+            # plt.show()
             break
 
 

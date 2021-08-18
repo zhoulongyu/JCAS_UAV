@@ -10,7 +10,7 @@ class Scenario(BaseScenario):
         # set any world properties first
         world.dim_c = 2
         num_agents = 30
-        num_landmarks = 30
+        num_target = 30
         world.collaborative = True
         # add agents
         world.agents = [Agent() for i in range(num_agents)]
@@ -19,9 +19,9 @@ class Scenario(BaseScenario):
             agent.collide = True
             agent.silent = True
             agent.size = 0.05
-        # add landmarks
-        world.landmarks = [Landmark() for i in range(num_landmarks)]
-        for i, landmark in enumerate(world.landmarks):
+        # add target
+        world.target = [Landmark() for i in range(num_target)]
+        for i, landmark in enumerate(world.target):
             landmark.name = 'landmark %d' % i
             landmark.collide = False
             landmark.movable = False
@@ -33,8 +33,8 @@ class Scenario(BaseScenario):
         # random properties for agents
         for i, agent in enumerate(world.agents):
             agent.color = np.array([0.35, 0.35, 0.85])
-        # random properties for landmarks
-        for i, landmark in enumerate(world.landmarks):
+        # random properties for target
+        for i, landmark in enumerate(world.target):
             landmark.color = np.array([0.25, 0.25, 0.25])
         # set random initial states
         for agent in world.agents:
@@ -44,8 +44,8 @@ class Scenario(BaseScenario):
         if mode == 1:
             return 0
 
-        num_landmarks = len(world.landmarks)
-        local_size = math.ceil(np.sqrt(num_landmarks))
+        num_target = len(world.target)
+        local_size = math.ceil(np.sqrt(num_target))
         local_x = np.linspace(-1, 1, local_size + 2)
         local = np.zeros((local_size * local_size, 2))
         index = 0
@@ -56,37 +56,37 @@ class Scenario(BaseScenario):
                 index += 1
 
         # print(local)
-        for i, landmark in enumerate(world.landmarks):
+        for i, landmark in enumerate(world.target):
             landmark.state.p_pos = np.random.uniform(-1, +1, world.dim_p)
             # landmark.state.p_pos = local[i]  #上面行注释，这行打开就是均匀分布
             landmark.state.p_vel = np.zeros(world.dim_p)
 
     def benchmark_data(self, world):
 
-        occupied_landmarks = 0
+        occupied_target = 0
         min_dists = 0
-        for l in world.landmarks:
+        for l in world.target:
             dists = [np.sqrt(np.sum(np.square(a.state.p_pos - l.state.p_pos))) for a in world.agents]
             if min(dists) < 0.4:
-                occupied_landmarks += 1
+                occupied_target += 1
 
-        return occupied_landmarks
+        return occupied_target
         # rew = 0
         # collisions = 0
-        # occupied_landmarks = 0
+        # occupied_target = 0
         # min_dists = 0
-        # for l in world.landmarks:
+        # for l in world.target:
         #     dists = [np.sqrt(np.sum(np.square(a.state.p_pos - l.state.p_pos))) for a in world.agents]
         #     min_dists += min(dists)
         #     rew -= min(dists)
         #     if min(dists) < 0.05:
-        #         occupied_landmarks += 1
+        #         occupied_target += 1
         # if agent.collide:
         #     for a in world.agents:
         #         if self.is_collision(a, agent):
         #             rew -= 1
         #             collisions += 1
-        # return (rew, collisions, min_dists, occupied_landmarks)
+        # return (rew, collisions, min_dists, occupied_target)
 
 
     def is_collision(self, agent1, agent2):
@@ -100,10 +100,10 @@ class Scenario(BaseScenario):
     def reward(self, agent, world):
         # Agents are rewarded based on minimum agent distance to each landmark, penalized for collisions
         rew = 0
-        # for l in world.landmarks:
+        # for l in world.target:
         #     dists = [np.sqrt(np.sum(np.square(a.state.p_pos - l.state.p_pos))) for a in world.agents]
         #     rew -= min(dists)
-        dists = [np.sqrt(np.sum(np.square(agent.state.p_pos - l.state.p_pos))) for l in world.landmarks]
+        dists = [np.sqrt(np.sum(np.square(agent.state.p_pos - l.state.p_pos))) for l in world.target]
 
         rew -= min(dists)
         # rew += 1/(2*min(dists))
@@ -114,10 +114,10 @@ class Scenario(BaseScenario):
         #     if min(dists) < 0.05:
         #         rew += 5
             # print("rew",rew)
-        # occupy = np.zeros(len(world.landmarks))
+        # occupy = np.zeros(len(world.target))
         # agentindex = -1
         # for a in world.agents:
-        #     dists = [np.sqrt(np.sum(np.square(a.state.p_pos - l.state.p_pos))) for l in world.landmarks]
+        #     dists = [np.sqrt(np.sum(np.square(a.state.p_pos - l.state.p_pos))) for l in world.target]
         #     index = np.argsort(dists, axis=-1)
         #     if a == agent and dists[index[0]] < 0.1:
         #         agentindex = index[0]
@@ -144,12 +144,12 @@ class Scenario(BaseScenario):
     def observation(self, agent, world):
         # get positions of all entities in this agent's reference frame
         entity_pos = []
-        for entity in world.landmarks:  # world.entities:
+        for entity in world.target:  # world.entities:
             entity_pos.append(entity.state.p_pos - agent.state.p_pos)
         # entity colors
         # print("entity_pos",entity_pos)
         entity_color = []
-        for entity in world.landmarks:  # world.entities:
+        for entity in world.target:  # world.entities:
             entity_color.append(entity.color)
         # communication of all other agents
         # print("entity_color", entity_color)

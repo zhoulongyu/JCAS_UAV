@@ -5,3 +5,7 @@ partical raw sensing dataset has been updload, including UWB and MPU 6050.
 
 The phases of antennas can be adjusted based on MIMO simulation.
 
+We estiblish a systemic simulation with a hardware-in-the-loop form, the data is collected based on pratical UAV nodes using DJI polit APP. The APP can conduct UAV trajectories based on automatic path planning or manual path planning operations.
+
+ALl the on-board sensors can acquire diverse sensing data and cache to mainfold computer, a miniaturized computer embeeded in DJI UAV. The computer can be regared as a cyber-twin system where we imitated the tracking performance based on historical tracking experiences. 
+
